@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from utils.banner import get_banner
-from utils.load_url_blueprints import load_urls
+from utils.load_url_blueprints import *
 from utils.concurrency import *
 
 from os.path import *
@@ -13,7 +13,8 @@ from colorama import Fore, Back, Style
 @click.option("--username", "-u", help="Specify username for the target to be hunted")
 @click.option("--blueprint", "-b", help="Specify the path to the blueprint", default=None)
 @click.option("--threads", "-t", help="Specifies the number of concurrent threads", default=30)
-def main(username, blueprint, threads):
+@click.option("--dump", "-d", help="Specifies the dumping file of successful urls", default=None)
+def main(username, blueprint, threads, dump):
     banner = get_banner()
     print(Fore.RED + banner)
     print(Fore.YELLOW + "[$] Made by with |_0VƐ by https://github.com/P-arag/")
@@ -31,11 +32,21 @@ def main(username, blueprint, threads):
     print(Fore.CYAN + "[+] Urls Loaded Successfully!!")
 
     try:
-        threads = int(threads)
+        threadsNum = int(threads)
         print(Fore.CYAN + "[+] Threads <: %s" % threads)
-        print(split_into_threads(urls, threads))
     except Exception as threadE:
         print(Fore.RED + f"[*] An Error occurred <: {threadE}")
+        exit()
+
+    if dump is not None:
+        try:
+            dump = expanduser(dump)
+            print(Fore.CYAN + "[+] Dumping Location <: %s" % dump)
+        except Exception as dumpE:
+            print(f"[*] An Error occurred {dumpE}")
+            exit()
+
+    
 
 
 if __name__ == "__main__":
