@@ -46,7 +46,7 @@ def main(username, blueprint, threads, dump):
             print(f"[*] An Error occurred {dumpE}")
             exit()
 
-    
+
 
 
 if __name__ == "__main__":
