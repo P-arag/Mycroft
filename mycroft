@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
-from os.path import *
 from utils.banner import get_banner
 from utils.load_url_blueprints import load_urls
+from utils.concurrency import *
+
+from os.path import *
 import click
 from colorama import Fore, Back, Style
 
@@ -10,21 +12,30 @@ from colorama import Fore, Back, Style
 @click.command()
 @click.option("--username", "-u", help="Specify username for the target to be hunted")
 @click.option("--blueprint", "-b", help="Specify the path to the blueprint", default=None)
-def main(username, blueprint):
+@click.option("--threads", "-t", help="Specifies the number of concurrent threads", default=30)
+def main(username, blueprint, threads):
     banner = get_banner()
-    print(Fore.RED+banner)
+    print(Fore.RED + banner)
+    print(Fore.YELLOW + "[$] Made by with |_0VƐ by https://github.com/P-arag/")
+    print(Fore.CYAN + "[+] Username to hunt down <: %s" % username)
 
-    urls = load_urls()
+    urls = load_urls(username)
 
     if blueprint is not None:
         try:
-            urls = load_urls(expanduser(blueprint))
-        except Exception as pathE:
-            print(Fore.RED+ f"An Error occured <: {pathE}")
+            urls = load_urls(username, expanduser(blueprint))
+        except Exception as urlE:
+            print(Fore.RED + f"[*] An Error occurred <: {urlE}")
             exit()
 
-    print(Fore.GREEN+"Urls Loaded Successfully!!")
+    print(Fore.CYAN + "[+] Urls Loaded Successfully!!")
 
+    try:
+        threads = int(threads)
+        print(Fore.CYAN + "[+] Threads <: %s" % threads)
+        print(split_into_threads(urls, threads))
+    except Exception as threadE:
+        print(Fore.RED + f"[*] An Error occurred <: {threadE}")
 
 
 if __name__ == "__main__":
