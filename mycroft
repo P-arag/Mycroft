@@ -6,7 +6,7 @@ from utils.concurrency import *
 
 from os.path import *
 import click
-from colorama import Fore, Back, Style
+from colorama import Fore
 
 
 @click.command()
@@ -14,19 +14,25 @@ from colorama import Fore, Back, Style
 @click.option("--blueprint", "-b", help="Specify the path to the blueprint", default=None)
 @click.option("--threads", "-t", help="Specifies the number of concurrent threads", default=30)
 @click.option("--dump", "-d", help="Specifies the dumping file of successful urls", default=None)
-def main(username, blueprint, threads, dump):
+@click.option("--fail/--not-fail", "-f/-nf", help="Specifies whether to show the unsuccessful attempts or not",
+              default=False)
+def main(username, blueprint, threads, dump, fail):
+    threadsNum: int
     banner = get_banner()
     print(Fore.RED + banner)
     print(Fore.YELLOW + "[$] Made by with |_0VƐ by https://github.com/P-arag/")
-    print(Fore.CYAN + "[+] Username to hunt down <: %s" % username)
 
     urls = load_urls(username)
+    if username is None:
+        print(Fore.RED + "[!] Username is a necessary option, use -u <username>")
+        exit()
+    print(Fore.CYAN + "[+] Username to hunt down <: %s" % username)
 
     if blueprint is not None:
         try:
             urls = load_urls(username, expanduser(blueprint))
         except Exception as urlE:
-            print(Fore.RED + f"[*] An Error occurred <: {urlE}")
+            print(Fore.RED + f"[!] An Error occurred <: {urlE}")
             exit()
 
     print(Fore.CYAN + "[+] Urls Loaded Successfully!!")
@@ -35,7 +41,7 @@ def main(username, blueprint, threads, dump):
         threadsNum = int(threads)
         print(Fore.CYAN + "[+] Threads <: %s" % threads)
     except Exception as threadE:
-        print(Fore.RED + f"[*] An Error occurred <: {threadE}")
+        print(Fore.RED + f"[!] An Error occurred <: {threadE}")
         exit()
 
     if dump is not None:
@@ -43,10 +49,20 @@ def main(username, blueprint, threads, dump):
             dump = expanduser(dump)
             print(Fore.CYAN + "[+] Dumping Location <: %s" % dump)
         except Exception as dumpE:
-            print(f"[*] An Error occurred {dumpE}")
+            print(f"[!] An Error occurred {dumpE}")
             exit()
+    else:
+        print(Fore.BLUE + "[*] No dumping location specified, going with default, use -d to specify dump file")
 
+    if fail:
+        print(Fore.CYAN + "[+] Showing failed attempts")
+    else:
+        print(Fore.BLUE + "[#] Not showing failed attempts, to see them use -f")
 
+    print(Fore.RESET)
+
+    readyToBeThreadedUrls = split_into_threads(urls, threadsNum)
+    thread_all(readyToBeThreadedUrls, fail)
 
 
 if __name__ == "__main__":
